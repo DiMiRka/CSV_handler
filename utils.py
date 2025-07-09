@@ -73,3 +73,23 @@ def csv_aggregate(data, column, func):
     elif func == 'avg':
         return sum(values) / len(values)
     return None
+
+
+def parse_order_by(order_by_str):
+    match = re.match(r'^(\w+)=(asc|desc)$', order_by_str)
+    if not match:
+        raise ValueError(f"Некорректный формат сортировки: {order_by_str}")
+    return match.groups()
+
+
+def csv_order_by(data, column, direction='asc'):
+    def get_sort_key(row):
+        value = row.get(column, '')
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return str(value).lower()
+
+    reverse = (direction == 'desc')
+
+    return sorted(data, key=get_sort_key, reverse=reverse)
