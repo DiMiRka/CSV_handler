@@ -48,10 +48,37 @@ def csv_filter(data: list, column: str, operator: str, value: str) -> list:
     return filtered
 
 
+def parse_aggregate(aggregate):
+    match = re.match(r'^(\w+)=(avg|min|max)$', aggregate)
+    if not match:
+        raise ValueError(f"Invalid aggregate format: {aggregate}")
+    return match.groups()
+
+
+def csv_aggregate(data, column, func):
+    values = []
+    for row in data:
+        try:
+            values.append(float(row[column]))
+        except (ValueError, TypeError):
+            continue
+
+    if not values:
+        return None
+
+    if func == 'min':
+        return min(values)
+    elif func == 'max':
+        return max(values)
+    else:
+        return sum(values) / len(values)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Обработка CSV-файла')
     parser.add_argument('--file', required=True, help='Путь к CSV-файлу')
-    parser.add_argument('--where', help='Условие фильтрации в формате название колонки оператор значение (пример rating>4.7')
+    parser.add_argument('--where', help='Фильтрация в формате название колонки оператор значение (пример: rating>4.7')
+    parser.add_argument('--aggregate', help='Агрегация в формате название колонки=агрегатор (пример: price=avg')
     args = parser.parse_args()
 
     try:
@@ -67,6 +94,16 @@ def main():
             filtered_data = csv_filter(data, column, operator, value)
         except Exception as e:
             print(f"Ошибка фильтрации: {e}")
+            sys.exit(1)
+
+    if args.aggregate:
+        try:
+            column, func = parse_aggregate(args.aggregate)
+            result = csv_aggregate(filtered_data, column, func)
+            print(tabulate([[func], [result]], tablefmt='grid'))
+            sys.exit(1)
+        except Exception as e:
+            print(f"Ошибка агрегации: {e}")
             sys.exit(1)
 
     if filtered_data:
