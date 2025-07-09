@@ -1,7 +1,7 @@
 import csv
 import pytest
 
-from utils import read_csv, parse_filter, csv_filter, parse_aggregate, csv_aggregate
+from utils import read_csv, parse_filter, csv_filter, parse_aggregate, csv_aggregate, parse_order_by, csv_order_by
 
 
 @pytest.fixture
@@ -61,3 +61,26 @@ def test_csv_aggregate(data_test):
 
     filtered = csv_filter(data, 'brand', '=', 'xiaomi')
     assert csv_aggregate(filtered, 'price', 'max') == 299.0
+
+
+def test_parse_order_by():
+    assert parse_order_by('price=desc') == ('price', 'desc')
+    assert parse_order_by('brand=asc') == ('brand', 'asc')
+    with pytest.raises(ValueError):
+        parse_aggregate('invalid_data')
+
+
+def test_csv_order_by(data_test):
+    data = read_csv(data_test)
+
+    sorted_asc = csv_order_by(data, 'price', 'asc')
+    prices = [float(row['price']) for row in sorted_asc]
+    assert prices == [199.0, 299.0, 999.0, 1199.0]
+
+    sorted_desc = csv_order_by(data, 'rating', 'desc')
+    ratings = [float(row['rating']) for row in sorted_desc]
+    assert ratings == [4.9, 4.8, 4.6, 4.4]
+
+    sorted_brand = csv_order_by(data, 'brand', 'asc')
+    brands = [row['brand'] for row in sorted_brand]
+    assert brands == ['apple', 'samsung', 'xiaomi', 'xiaomi']
