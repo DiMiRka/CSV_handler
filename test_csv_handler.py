@@ -1,7 +1,7 @@
 import csv
 import pytest
 
-from main import read_csv, parse_filter, csv_filter
+from main import read_csv, parse_filter, csv_filter, parse_aggregate, csv_aggregate
 
 
 @pytest.fixture
@@ -43,3 +43,20 @@ def test_csv_filter(data_test):
     filtered = csv_filter(data, 'brand', '=', 'xiaomi')
     assert len(filtered) == 2
     assert {row['name'] for row in filtered} == {'redmi note 12', 'poco x5 pro'}
+
+
+def test_parse_aggregate():
+    assert parse_aggregate("rating=avg") == ('rating', 'avg')
+    assert parse_aggregate("price=min") == ('price', 'min')
+    with pytest.raises(ValueError):
+        parse_aggregate('invalid_data')
+
+
+def test_csv_aggregate(data_test):
+    data = read_csv(data_test)
+
+    assert csv_aggregate(data, 'price', 'avg') == pytest.approx(674.0)
+    assert csv_aggregate(data, 'rating', 'min') == 4.4
+
+    filtered = csv_filter(data, 'brand', '=', 'xiaomi')
+    assert csv_aggregate(filtered, 'price', 'max') == 299.0
