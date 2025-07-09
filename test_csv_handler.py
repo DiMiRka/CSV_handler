@@ -1,7 +1,7 @@
 import csv
 import pytest
 
-from main import read_csv, parse_filter, csv_filter, parse_aggregate, csv_aggregate
+from utils import read_csv, parse_filter, csv_filter, parse_aggregate, csv_aggregate
 
 
 @pytest.fixture
