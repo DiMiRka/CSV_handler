@@ -55,8 +55,9 @@ def test_parse_aggregate():
 def test_csv_aggregate(data_test):
     data = read_csv(data_test)
 
-    assert csv_aggregate(data, 'price', 'avg') == pytest.approx(674.0)
+    assert csv_aggregate(data, 'price', 'avg') == 674.0
     assert csv_aggregate(data, 'rating', 'min') == 4.4
+    assert csv_aggregate(data, 'price', 'median') == 649.0
 
     filtered = csv_filter(data, 'brand', '=', 'xiaomi')
     assert csv_aggregate(filtered, 'price', 'max') == 299.0

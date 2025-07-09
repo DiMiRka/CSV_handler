@@ -1,5 +1,6 @@
 import csv
 import re
+from statistics import median
 
 
 def read_csv(file_path) -> list:
@@ -46,7 +47,7 @@ def csv_filter(data: list, column: str, operator: str, value: str) -> list:
 
 
 def parse_aggregate(aggregate):
-    match = re.match(r'^(\w+)=(avg|min|max)$', aggregate)
+    match = re.match(r'^(\w+)=(avg|min|max|median)$', aggregate)
     if not match:
         raise ValueError(f"Invalid aggregate format: {aggregate}")
     return match.groups()
@@ -67,5 +68,8 @@ def csv_aggregate(data, column, func):
         return min(values)
     elif func == 'max':
         return max(values)
-    else:
+    elif func == 'median':
+        return median(values)
+    elif func == 'avg':
         return sum(values) / len(values)
+    return None
